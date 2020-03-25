@@ -19,7 +19,7 @@
         path:String,
         activeColor:{
           type:String,
-          default:'red'
+          default:'#ff8198'
         }
       },
       computed:{
@@ -42,7 +42,6 @@
   .tab-bar-item{
     flex: 1;
     text-align: center;
-    height: 49px;
     font-size: 14px;
   }
   .tab-bar-item img {

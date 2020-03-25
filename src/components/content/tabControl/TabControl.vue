@@ -40,7 +40,7 @@
     font-size: 15px;
     height: 40px;
     line-height: 40px;
-    z-index: 9;
+    background-color: #fff;
   }
 .tab-control-item{
   flex: 1;
