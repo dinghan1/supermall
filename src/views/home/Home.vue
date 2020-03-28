@@ -32,10 +32,10 @@
   import TabControl from "components/content/tabControl/TabControl";
   import GoodsList from "components/content/goods/GoodsList";
   import Scroll from "components/common/scroll/Scroll";
-  import BackTop from "components/content/backTop/BackTop";
+  // import BackTop from "components/content/backTop/BackTop";
 
   import {getHomeMultidata,getHomeGoods} from 'network/home'
-  import {itemListenerMixin} from "common/mixin";
+  import {itemListenerMixin,backtopMixin} from "common/mixin";
 
   export default {
         name: "Home",
@@ -47,7 +47,7 @@
           TabControl,
           GoodsList,
           Scroll,
-          BackTop
+          // BackTop
         },
       data(){
         return {
@@ -59,7 +59,7 @@
             'sell':{page:0,list:[]},
           },
           currentType:'pop',
-          isShow:false,
+          // isShow:false,
           tabOffsetTop:0,
           isTabFixed:false,
           saveY:0
@@ -77,7 +77,7 @@
     mounted() {
       console.log('我不是混入的');
     },
-    mixins:[itemListenerMixin],
+    mixins:[itemListenerMixin,backtopMixin],
     destroyed() {
       console.log('destroyed');
     },
@@ -121,12 +121,13 @@
             this.$refs.tabControl1.currentIndex = index
             this.$refs.tabControl2.currentIndex = index
           },
-        backClick(){
-            this.$refs.scroll.scrollTo(0,0)
-        },
+        // backClick(){
+        //     this.$refs.scroll.scrollTo(0,0)
+        // },
         scroll(position){
+            this.ifshow(position)
             //1.判断backtop是否显示
-          this.isShow = position.y<-1000
+          // this.isShow = position.y<-1000
           //2.判断tabControl是否吸顶
             this.isTabFixed = (-position.y)>this.tabOffsetTop
         },

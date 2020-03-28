@@ -1,7 +1,7 @@
 <template>
   <div id="detail">
-    <DetailNavBar class="detail-navbar" @titleClick="titleClick"></DetailNavBar>
-    <scroll class="content" ref="scroll">
+    <DetailNavBar class="detail-navbar" @titleClick="titleClick" ref="titlenb"></DetailNavBar>
+    <scroll class="content" ref="scroll" :probe-type="3" @scroll="contentScroll">
         <DetailSwiper :top-images="topImages"></DetailSwiper>
         <DetailBaseInfo :goods="goods"></DetailBaseInfo>
         <DetailShopInfo :shop="shop"></DetailShopInfo>
@@ -10,6 +10,8 @@
         <DetailCommentInfo :comment-info="commentInfo" ref="comment"></DetailCommentInfo>
         <GoodsList :goods="recommends" ref="recommend"></GoodsList>
     </scroll>
+    <back-top @click.native="backClick" v-show="isShow"></back-top>
+    <detail-bottom-bar @addToCart="addToCart"></detail-bottom-bar>
   </div>
 </template>
 
@@ -22,8 +24,10 @@
     import DetailGoodsInfo from "./childComps/DetailGoodsInfo";
     import DetailParamInfo from "./childComps/DetailParamInfo";
     import DetailCommentInfo from "./childComps/DetailCommentInfo";
+    import DetailBottomBar from "./childComps/DetailBottomBar";
     import GoodsList from "components/content/goods/GoodsList";
-    import {itemListenerMixin} from "common/mixin";
+    // import BackTop from "../../components/content/backTop/BackTop";
+    import {itemListenerMixin,backtopMixin} from "common/mixin";
     import {getDetail,Goods,Shop,GoodsParam,getRecommend} from "network/detail";
     import {debounce} from "../../common/utils";
 
@@ -38,7 +42,9 @@
           DetailGoodsInfo,
           DetailParamInfo,
           DetailCommentInfo,
-          GoodsList
+          GoodsList,
+          DetailBottomBar,
+          // BackTop
         },
         data(){
           return {
@@ -50,7 +56,10 @@
             paramsInfo:{},
             commentInfo:{},
             recommends:[],
-            themeTopYs:[]
+            themeTopYs:[],
+            getThemeTopY:null,
+            scrollIndex:0,
+            // isShow:false,
           }
         },
       created(){
@@ -105,10 +114,14 @@
           this.themeTopYs.push(this.$refs.params.$el.offsetTop-44)
           this.themeTopYs.push(this.$refs.comment.$el.offsetTop-44)
           this.themeTopYs.push(this.$refs.recommend.$el.offsetTop-44)
+          this.themeTopYs.push(Number.MAX_VALUE)
           console.log(this.themeTopYs);
         },300)
       },
       methods:{
+        // backClick(){
+        //   this.$refs.scroll.scrollTo(0,0)
+        // },
         imageLoad(){
           this.refresh()
           // this.$refs.scroll.refresh()
@@ -117,9 +130,45 @@
         titleClick(index){
           // console.log(index);
           this.$refs.scroll.scrollTo(0,-this.themeTopYs[index],200)
+        },
+        contentScroll(position){
+          //1.获取y值
+          const positionY = -position.y
+          //2.positionY和主题中的值进行对比
+          let length = this.themeTopYs.length
+          for (let i = 0;i<length-1;i++){
+            if(this.scrollIndex !== i && (positionY >= this.themeTopYs[i] && positionY <this.themeTopYs[i+1])){
+              this.scrollIndex = i
+              this.$refs.titlenb.currentIndex = this.scrollIndex
+            }
+          }
+          this.ifshow(position)
+          // for(let i = 0; i< length;i++){
+          //   if(this.scrollIndex !== i &&
+          //     ((i < length - 1 && positionY >= this.themeTopYs[i]
+          //       && positionY < this.themeTopYs[i+1])
+          //       || (i === length -1 && positionY >= this.themeTopYs[i]))){
+          //     this.scrollIndex = i
+          //     this.$refs.titlenb.currentIndex = this.scrollIndex
+          //   }
+          // }
+          //1.判断backtop是否显示
+          // this.isShow = position.y<-1000
+        },
+        addToCart(){
+          //1.获取购物车需要展示的信息
+          const product = {}
+          product.image = this.topImages[0]
+          product.title = this.goods.title
+          product.desc = this.goods.desc
+          product.price = this.goods.realPrice
+          product.iid = this.iid
+          //2.将商品添加到购物车
+          // this.$store.commit('addCart',product)
+          this.$store.dispatch('addCart',product)
         }
       },
-      mixins:[itemListenerMixin],
+      mixins:[itemListenerMixin,backtopMixin],
       destroyed() {
         this.$bus.$off('itemimgload',this.itemImageListener)
       }
@@ -139,7 +188,7 @@
     z-index: 9;
   }
   .content{
-    height: calc(100% - 44px);
+    height: calc(100% - 44px - 58px);
     background-color: #fff;
   }
 </style>
