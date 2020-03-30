@@ -12,6 +12,7 @@
     </scroll>
     <back-top @click.native="backClick" v-show="isShow"></back-top>
     <detail-bottom-bar @addToCart="addToCart"></detail-bottom-bar>
+<!--    <toast :message="message" :show="show"></toast>-->
   </div>
 </template>
 
@@ -26,10 +27,12 @@
     import DetailCommentInfo from "./childComps/DetailCommentInfo";
     import DetailBottomBar from "./childComps/DetailBottomBar";
     import GoodsList from "components/content/goods/GoodsList";
+    // import Toast from "components/common/toast/Toast";
     // import BackTop from "../../components/content/backTop/BackTop";
     import {itemListenerMixin,backtopMixin} from "common/mixin";
     import {getDetail,Goods,Shop,GoodsParam,getRecommend} from "network/detail";
     import {debounce} from "../../common/utils";
+    import { mapActions } from 'vuex'
 
     export default {
         name: "Detail",
@@ -43,6 +46,7 @@
           DetailParamInfo,
           DetailCommentInfo,
           GoodsList,
+          // Toast,
           DetailBottomBar,
           // BackTop
         },
@@ -60,6 +64,8 @@
             getThemeTopY:null,
             scrollIndex:0,
             // isShow:false,
+            // show:false,
+            // message:''
           }
         },
       created(){
@@ -119,6 +125,7 @@
         },300)
       },
       methods:{
+          ...mapActions(['addCart']),
         // backClick(){
         //   this.$refs.scroll.scrollTo(0,0)
         // },
@@ -164,8 +171,20 @@
           product.price = this.goods.realPrice
           product.iid = this.iid
           //2.将商品添加到购物车
+          //2.1 actions可以返回一个Promise
+          //2.2 mapActions的映射关系
           // this.$store.commit('addCart',product)
-          this.$store.dispatch('addCart',product)
+          this.addCart(product).then(res => {
+            this.$toast.show(res,1000)
+            // this.show = true
+            // this.message = res
+            // setTimeout(() => {
+            //   this.show = false
+            // },1000)
+          })
+          // this.$store.dispatch('addCart',product).then(res => {
+          //   console.log(res);
+          // })
         }
       },
       mixins:[itemListenerMixin,backtopMixin],
